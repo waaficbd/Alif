@@ -370,12 +370,12 @@
         <div class="slider-section">
             <div class="slider-header">
                 <span>Маблағи қарз</span>
-                <span id="valAmt" class="accent-text">2 500 сомонӣ</span>
+                <span id="valAmt" class="accent-text">2 500 TJS</span>
             </div>
             <input type="range" id="amt" min="500" max="50000" step="500" value="2500">
             <div class="slider-footer">
-                <span>500 сомонӣ</span>
-                <span>50 000 сомонӣ</span>
+                <span>500 TJS</span>
+                <span>50 000 TJS</span>
             </div>
         </div>
 
@@ -395,7 +395,7 @@
         <!-- Натиҷаи пардохти моҳона -->
         <div class="result-container">
             <span class="result-label">Пардохти моҳона</span>
-            <span id="monthly" class="result-amount">219 сомонӣ</span>
+            <span id="monthly" class="result-amount">219 TJS</span>
         </div>
         
         <div class="interest-rate-info">
@@ -459,8 +459,8 @@
         const principal = Number(amtEl.value) || 0;
         const durationMonths = Number(durEl.value) || 1;
 
-        // Намоиши маблағ бо пули миллии Тоҷикистон (сомонӣ)
-        document.getElementById('valAmt').innerText = `${formatTJS(principal)} сомонӣ`;
+        // Намоиши маблағ бо рамзи пулии TJS
+        document.getElementById('valAmt').innerText = `${formatTJS(principal)} TJS`;
         document.getElementById('valDur').innerText = `${durationMonths} моҳ`;
 
         // Ҳисобкунии фоизи солона (5%)
@@ -469,7 +469,7 @@
         const totalAmount = principal + totalInterest;
         calculatedMonthly = Math.round(totalAmount / durationMonths);
 
-        document.getElementById('monthly').innerText = `${formatTJS(calculatedMonthly)} сомонӣ`;
+        document.getElementById('monthly').innerText = `${formatTJS(calculatedMonthly)} TJS`;
     }
 
     function goToPage2() {
