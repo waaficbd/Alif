@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Алиф Тоҷикистон — Хулосаи дархости қарз</title>
+
+    <!-- ✅ Telegram SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        :root {
+            --alif-green: #00B956;       /* Сабзи асосии Алиф */
+            --alif-green-dark: #009E49;  /* Сабзи тира барои пахш */
+            --alif-dark: #1A1C1E;        /* Сиёҳи нарм барои матнҳо */
+            --alif-accent-green: #009E49;
+            --bg-color: #F4F5F7;         /* Заминаи хокистарии равшани Alif Mobi */
+            --card-bg: #FFFFFF;
+            --text-main: #1A1C1E;
+            --text-muted: #6E7781;
+            --input-border: #E2E8F0;
+            --calc-bg: #ECFDF3;
+            --calc-border: #C6F6D5;
+            --btn-gray: #F0F2F5;
+            --btn-gray-text: #444444;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            color: var(--text-main);
+        }
+
+        /* Сарлавҳаи болоӣ дар услуби Alif Mobi */
+        .app-header {
+            width: 100%;
+            background-color: var(--card-bg);
+            height: 60px;
+            padding: 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid #EAECEF;
+        }
+
+        .back-btn-top {
+            color: var(--alif-dark);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .header-title {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--alif-dark);
+        }
+
+        .alif-logo-mark {
+            width: 26px;
+            height: 26px;
+            background-color: var(--alif-green);
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 900;
+            font-size: 16px;
+        }
+
+        .header-title .region {
+            color: var(--alif-green);
+            font-size: 11px;
+            font-weight: 700;
+            background: var(--calc-bg);
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+
+        .menu-icon {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .menu-icon span {
+            display: block;
+            width: 22px;
+            height: 2.5px;
+            background-color: var(--alif-dark);
+            border-radius: 2px;
+        }
+
+        /* Тарҳи корти асосӣ */
+        .card {
+            background: var(--card-bg);
+            width: 92%;
+            max-width: 440px;
+            margin: 18px 0 24px;
+            padding: 26px 22px;
+            border-radius: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-title {
+            font-size: 24px;
+            color: var(--text-main);
+            margin: 0 0 6px;
+            text-align: center;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        .subtext {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 24px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Нишондиҳандаи қадамҳо (Ҳар 3 қадам фаъол) */
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 auto 32px;
+            width: 100%;
+        }
+
+        .step-bar {
+            flex: 1;
+            height: 6px;
+            background-color: #E2E8F0;
+            border-radius: 3px;
+        }
+
+        .step-bar.active {
+            background-color: var(--alif-green);
+        }
+
+        /* Формаи вуруд */
+        .form-group {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--alif-dark);
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            font-size: 15px;
+            padding: 14px 16px;
+            border: 2px solid var(--input-border);
+            border-radius: 12px;
+            background-color: #ffffff;
+            color: #111111;
+            outline: none;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        .form-control::placeholder {
+            color: #A0AEC0;
+        }
+
+        .form-control:focus {
+            border-color: var(--alif-green);
+        }
+
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231A1C1E' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 14px;
+            padding-right: 40px;
+            cursor: pointer;
+        }
+
+        /* Қуттии хулоса бо ҳошияи сабз */
+        .summary-card {
+            background-color: var(--calc-bg);
+            border-left: 4px solid var(--alif-green);
+            padding: 18px 16px;
+            border-radius: 14px;
+            margin: 10px 0 24px;
+            border-top: 1px solid var(--calc-border);
+            border-right: 1px solid var(--calc-border);
+            border-bottom: 1px solid var(--calc-border);
+        }
+
+        .summary-card h3 {
+            margin: 0 0 14px 0;
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--alif-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px dashed #C6F6D5;
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .summary-label {
+            color: #6E7781;
+            font-size: 13.5px;
+            font-weight: 500;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            font-size: 13.5px;
+            color: #1A1C1E;
+            text-align: right;
+        }
+
+        /* Тугмаҳо */
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .btn-prev {
+            background-color: var(--btn-gray);
+            color: var(--btn-gray-text);
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: background-color 0.2s;
+        }
+
+        .btn-prev:hover {
+            background-color: #E2E6EA;
+        }
+
+        .btn-next {
+            background-color: var(--alif-green);
+            color: #ffffff;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 800;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 14px rgba(0, 185, 86, 0.28);
+        }
+
+        .btn-next:active {
+            background-color: var(--alif-green-dark);
+            transform: scale(0.99);
+        }
+
+        /* Поёнварақ */
+        .footer-banner {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Сарлавҳаи барнома -->
+<div class="app-header">
+    <a onclick="goBack()" class="back-btn-top">← Бозгашт</a>
+    <div class="header-title">
+        <div class="alif-logo-mark">а</div>
+        <span>alif</span><span class="region">Тоҷикистон</span>
+    </div>
+    <div class="menu-icon">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</div>
+
+<div class="card">
+    <h1 class="main-title">Дархости қарз</h1>
+    <div class="subtext">Қадами 3 аз 3</div>
+
+    <!-- Нишондиҳандаи қадамҳо (Ҳар 3 қадам фаъол) -->
+    <div class="step-indicator">
+        <div class="step-bar active"></div>
+        <div class="step-bar active"></div>
+        <div class="step-bar active"></div>
+    </div>
+
+    <!-- Форма ва Хулоса -->
+    <form id="step3Form" onsubmit="submitForm(event)">
+        <div class="form-group">
+            <label for="jobStatus">Вазъи шуғл</label>
+            <select id="jobStatus" class="form-control" required>
+                <option value="Корманд" selected>Корманд</option>
+                <option value="Соҳибкор / Соҳиби тиҷорат">Соҳибкор / Соҳиби тиҷорат</option>
+                <option value="Донишҷӯ">Донишҷӯ</option>
+                <option value="Кор намекунад">Кор намекунад</option>
+                <option value="Нафақахӯр">Нафақахӯр</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="income">Даромади миёнаи моҳона (TJS)</label>
+            <input type="number" id="income" class="form-control" placeholder="масалан, 5000" required>
+        </div>
+
+        <div class="summary-card">
+            <h3>Хулосаи дархост</h3>
+
+            <div class="summary-row">
+                <span class="summary-label">Маблағи қарз:</span>
+                <span class="summary-value" id="sumAmount">--</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Муҳлати қарз:</span>
+                <span class="summary-value" id="sumDuration">--</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Мақсади қарз:</span>
+                <span class="summary-value" id="sumPurpose">--</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Аризадиҳанда:</span>
+                <span class="summary-value" id="sumName">--</span>
+            </div>
+
+            <div class="summary-row">
+                <span class="summary-label">Рақами телефон:</span>
+                <span class="summary-value" id="sumPhone">--</span>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button type="button" class="btn-prev" onclick="goBack()">ҚАБЛӢ</button>
+            <button type="submit" class="btn-next">ИРСИРИ ДАРХОСТ</button>
+        </div>
+    </form>
+</div>
+
+<!-- Поёнварақ -->
+<div class="footer-banner">
+    © 2026 ҶСК «Алиф Бонк» — Тоҷикистон
+</div>
+
+<script>
+window.onload = () => {
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.ready();   
+        tg.expand();
+    }
+
+    // Гирифтани маълумот аз қадамҳои пешина
+    const amount = localStorage.getItem('appliedAmount') || localStorage.getItem('amount');
+    const term = localStorage.getItem('appliedTerm') || localStorage.getItem('loanDuration');
+    const purpose = localStorage.getItem('appliedPurpose') || localStorage.getItem('loanPurpose');
+    const fName = localStorage.getItem('firstName') || "";
+    const lName = localStorage.getItem('lastName') || "";
+    const phone = localStorage.getItem('phone') || "";
+
+    // Формат ва пур кардани хулоса
+    if (amount) {
+        const numAmount = Number(amount.replace(/\D/g, ''));
+        document.getElementById('sumAmount').innerText = numAmount 
+            ? `${numAmount.toLocaleString('en-US')} TJS` 
+            : `${amount} TJS`;
+    } else {
+        document.getElementById('sumAmount').innerText = "--";
+    }
+
+    document.getElementById('sumDuration').innerText = term ? term : "--";
+    document.getElementById('sumPurpose').innerText = purpose ? purpose : "--";
+    document.getElementById('sumName').innerText = `${fName} ${lName}`.trim() || "--";
+    document.getElementById('sumPhone').innerText = phone ? `+992 ${phone}` : "--";
+};
+
+function submitForm(event) {
+    event.preventDefault();
+    const tg = window.Telegram?.WebApp;
+    const incomeVal = document.getElementById('income').value.trim();
+
+    if (!incomeVal) {
+        alert("Лутфан даромади миёнаи моҳонаи худро ворид кунед.");
+        return;
+    }
+
+    const data = {
+        amount: localStorage.getItem('appliedAmount') || localStorage.getItem('amount'),
+        duration: localStorage.getItem('appliedTerm') || localStorage.getItem('loanDuration'),
+        purpose: localStorage.getItem('appliedPurpose') || localStorage.getItem('loanPurpose'),
+        firstName: localStorage.getItem('firstName'),
+        lastName: localStorage.getItem('lastName'),
+        email: localStorage.getItem('email'),
+        phone: localStorage.getItem('phone'),
+        jobStatus: document.getElementById('jobStatus').value,
+        income: incomeVal,
+        currency: "TJS"
+    };
+
+    // Захира кардани тафсилоти ниҳоии пешниҳод
+    localStorage.setItem('jobStatus', data.jobStatus);
+    localStorage.setItem('income', incomeVal);
+
+    if (tg && tg.sendData) {
+        tg.sendData(JSON.stringify(data));
+        setTimeout(() => {
+            window.location.href = "/page5";
+        }, 300);
+    } else {
+        console.log("Submitted payload:", data);
+        window.location.href = "/page5";
+    }
+}
+
+function goBack() {
+    window.location.href = "/page3";
+}
+</script>
+
+</body>
+</html>
